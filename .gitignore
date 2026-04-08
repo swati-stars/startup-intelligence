@@ -1,0 +1,1 @@
+venv/\n.env\ndata/*.csv\n__pycache__/

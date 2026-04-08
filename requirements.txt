@@ -1,0 +1,13 @@
+pandas
+numpy
+requests
+praw
+google-play-scraper
+vaderSentiment
+textblob
+scikit-learn
+streamlit
+plotly
+matplotlib
+wordcloud
+python-dotenv
