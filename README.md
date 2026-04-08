@@ -13,8 +13,8 @@
 
 | Dashboard | Link |
 |-----------|------|
-| 🎯 PMF Analyzer | [Launch →](YOUR_PMF_STREAMLIT_URL) |
-| 📊 Feedback Intelligence | [Launch →](YOUR_FEEDBACK_STREAMLIT_URL) |
+| 🎯 PMF Analyzer | [Launch →](https://startup-intelligence-8mqfrkreo6urglkundt8uu.streamlit.app/) |
+| 📊 Feedback Intelligence | [Launch →](https://startup-intelligence-gmvyk33wmbhnmucj9qycsj.streamlit.app/) |
 
 ---
 
