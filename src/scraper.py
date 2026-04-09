@@ -10,19 +10,54 @@ load_dotenv()
 def scrape_play_store(app_id, app_name, count=500):
     print(f"Scraping {count} reviews for {app_name}...")
     result, _ = reviews(app_id, lang='en', country='us', sort=Sort.MOST_RELEVANT, count=count)
+    
+    if not result:
+        print("  No results returned")
+        return pd.DataFrame(columns=['text', 'score', 'at', 'source', 'app_name'])
+    
     df = pd.DataFrame(result)
-    print(f"Available columns: {df.columns.tolist()}")
-    keep_cols = ['content', 'score', 'at']
-    for optional in ['thumbsUpCount', 'thumbsUp']:
-        if optional in df.columns:
-            keep_cols.append(optional)
+    print(f"  Actual columns returned: {df.columns.tolist()}")
+    
+    # Find the review text column — could be named differently
+    text_col = None
+    for candidate in ['content', 'text', 'review', 'body', 'reviewText']:
+        if candidate in df.columns:
+            text_col = candidate
             break
-    df = df[keep_cols]
-    df['source'] = 'play_store'
-    df['app_name'] = app_name
-    df['text'] = df['content']
-    print(f"  Collected {len(df)} reviews")
-    return df
+    
+    # Find the rating column
+    score_col = None
+    for candidate in ['score', 'rating', 'stars', 'reviewRating']:
+        if candidate in df.columns:
+            score_col = candidate
+            break
+
+    # Find the date column
+    date_col = None
+    for candidate in ['at', 'date', 'reviewCreatedVersion', 'reviewDate']:
+        if candidate in df.columns:
+            date_col = candidate
+            break
+
+    if not text_col:
+        print(f"  Could not find text column in: {df.columns.tolist()}")
+        # Use first string column as fallback
+        for col in df.columns:
+            if df[col].dtype == object:
+                text_col = col
+                break
+
+    print(f"  Using: text={text_col}, score={score_col}, date={date_col}")
+
+    result_df = pd.DataFrame()
+    result_df['text'] = df[text_col] if text_col else ''
+    result_df['score'] = df[score_col] if score_col else 3
+    result_df['at'] = df[date_col] if date_col else pd.Timestamp.now()
+    result_df['source'] = 'play_store'
+    result_df['app_name'] = app_name
+
+    print(f"  Collected {len(result_df)} reviews")
+    return result_df
 
 def scrape_reddit(query, subreddits, limit=200):
     reddit = praw.Reddit(client_id=os.getenv('REDDIT_CLIENT_ID'), client_secret=os.getenv('REDDIT_CLIENT_SECRET'), user_agent='startup_pmf_analyzer/1.0')
