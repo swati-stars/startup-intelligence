@@ -45,30 +45,22 @@ with st.sidebar:
 
 
 # ─── DATA LOADING ─────────────────────────────────────────────────────────────
-@st.cache_data
+@st.cache_data  # Cache so we don't re-scrape on every interaction
 def load_and_process(app_id, app_name):
     raw_path = f"data/{app_name.lower()}_raw.csv"
     processed_path = f"data/{app_name.lower()}_processed.csv"
 
-    # Use cached processed data if it exists
-    if os.path.exists(processed_path):
-        return pd.read_csv(processed_path)
+    # Scrape if no cached data
+    if not os.path.exists(raw_path):
+        with st.spinner("Scraping reviews..."):
+            collect_data(app_id, app_name, reddit_query=app_name)
 
-    # Use cached raw data if it exists
-    if os.path.exists(raw_path):
+    # Run NLP pipeline if not processed
+    if not os.path.exists(processed_path):
         with st.spinner("Running NLP analysis..."):
             run_pipeline(raw_path, processed_path)
-        return pd.read_csv(processed_path)
 
-    # Otherwise scrape fresh
-    with st.spinner("Scraping reviews... this takes ~30 seconds"):
-        try:
-            collect_data(app_id, app_name, reddit_query=app_name)
-            run_pipeline(raw_path, processed_path)
-            return pd.read_csv(processed_path)
-        except Exception as e:
-            st.error(f"Scraping failed: {e}")
-            return None
+    return pd.read_csv(processed_path)
 
 
 # ─── MAIN DASHBOARD ───────────────────────────────────────────────────────────
