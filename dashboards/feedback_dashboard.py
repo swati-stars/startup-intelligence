@@ -17,11 +17,34 @@ st.markdown("*Transform messy app reviews into structured business insights*")
 
 with st.sidebar:
     st.header("Settings")
-    data_file = st.selectbox(
-        "Select dataset",
-        options=[f for f in os.listdir("data") if f.endswith("_processed.csv")]
-        if os.path.exists("data") else ["No data yet"]
+    
+    # Auto-detect all processed CSV files in data/ folder
+    data_folder = "data"
+    os.makedirs(data_folder, exist_ok=True)
+    
+    available_files = [
+        f for f in os.listdir(data_folder) 
+        if f.endswith("_processed.csv")
+    ]
+    
+    if not available_files:
+        st.warning("No processed data found yet.")
+        st.info("Analyze an app in the PMF Analyzer first, then come back here.")
+        st.stop()
+    
+    # Clean display names — "notion_processed.csv" → "Notion"
+    display_names = {
+        f: f.replace("_processed.csv", "").replace("_", " ").title() 
+        for f in available_files
+    }
+    
+    selected_display = st.selectbox(
+        "Select app to analyze",
+        options=list(display_names.values())
     )
+    
+    # Get actual filename from display name
+    data_file = [k for k, v in display_names.items() if v == selected_display][0]
 
 
 # Load data
@@ -29,9 +52,7 @@ with st.sidebar:
 def load_data(filename):
     return pd.read_csv(f"data/{filename}")
 
-
-if data_file and data_file != "No data yet":
-    df = load_data(data_file)
+df = load_data(data_file)
 
     # ── EXECUTIVE SUMMARY ─────────────────────────────────────────────────────
     st.subheader("Executive Summary")
