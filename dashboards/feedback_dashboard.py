@@ -18,9 +18,7 @@ with st.sidebar:
         st.warning("No processed data found yet.")
         st.info("Analyze an app in the PMF Analyzer first, then come back here.")
         st.stop()
-    display_names = {f: f.replace("_processed.csv", "").replace("_", " ").title() for f in available_files}
-    selected_display = st.selectbox("Select app to analyze", options=list(display_names.values()))
-    data_file = [k for k, v in display_names.items() if v == selected_display][0]
+    data_file = st.selectbox("Select dataset", options=available_files)
 
 @st.cache_data
 def load_data(filename):
